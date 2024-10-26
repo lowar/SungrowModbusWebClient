@@ -1,6 +1,6 @@
-from pymodbus.client import BaseModbusClient
-from pymodbus.transaction import ModbusSocketFramer, ModbusBinaryFramer
-from pymodbus.factory import ClientDecoder
+from pymodbus.client import ModbusBaseClient
+from pymodbus.framer import FramerType
+#from pymodbus.factory import ClientDecoder
 from pymodbus.exceptions import ConnectionException
 from websocket import create_connection
 from .version import __version__
@@ -17,7 +17,7 @@ import time
 # pass to PyModbus to parse like a standard Modbus RTU message
 # --------------------------------------------------------------------------- #
 
-class SungrowModbusWebClient(BaseModbusClient):
+class SungrowModbusWebClient(ModbusBaseClient):
     """ Implementation of a modbus over Sungrow HTTP client
     """
 
@@ -27,12 +27,12 @@ class SungrowModbusWebClient(BaseModbusClient):
     # https://github.com/bohdan-s/Sungrow-Inverter/blob/main/Install%20Guides/TD_202103_Sungrow%20Inverter%20and%20Compatible%20Accessories_V1.0.pdf
 
     def __init__(self, host='127.0.0.1', port=8082,
-        framer=ModbusSocketFramer, **kwargs):
+        framer=FramerType.SOCKET, **kwargs):
         """ Initialize a client instance
         :param host: The host to connect to (default 127.0.0.1)
         :param port: The websocket port to connect to (default 8082)
         :param timeout: The timeout to use for this socket (default 5)
-        :param framer: The modbus framer to use (default ModbusSocketFramer)
+        :param framer: The modbus framer to use (default FramerSocket)
         .. note:: The host argument will accept ipv4 and ipv6 hosts
         """
 
@@ -40,7 +40,7 @@ class SungrowModbusWebClient(BaseModbusClient):
         self.ws_port = port
         self.timeout = kwargs.get('timeout',  '5')
         self.ws_socket = None
-        BaseModbusClient.__init__(self, framer(ClientDecoder(), self), **kwargs)
+        ModbusBaseClient.__init__(self, framer, **kwargs)
         
         self.ws_endpoint = "ws://" + str(self.dev_host) + ":" + str(self.ws_port) + "/ws/home/overview"
         self.ws_token = ""
